@@ -37,7 +37,7 @@ export const SignUp = () => {
 
     setLoading(false);
     setError(null);
-    navigate('/signin');
+    navigate('/sign-in');
   } catch (error) {
     setLoading(false);
     setError(error.message);
@@ -78,7 +78,7 @@ export const SignUp = () => {
       </form>
       <div className="flex gap-2 mt-5">
         <p>Have an account?</p>
-        <Link to={"/signin"}>
+        <Link to={"/sign-in"}>
           <span className="text-blue-700">Sign in</span>
         </Link>
       </div>
