@@ -12,6 +12,7 @@ import {
     FaShare
 } from 'react-icons/fa';
 import { useSelector } from 'react-redux'; 
+import Contact from '../components/Contact';
 
 export default function Listing() {
     const [listing, setListing] = useState(null);
@@ -147,6 +148,7 @@ export default function Listing() {
                             Contact Landlord
                         </button>
                     )}
+                    {contact && <Contact listing={listing}/>}
                     
                 </div>
             </>
