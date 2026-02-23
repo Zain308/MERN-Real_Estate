@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { useNavigate, useLocation } from "react-router-dom"; 
+import ListingItem from "../components/ListingItem";
 
 export default function Search() {
   const navigate = useNavigate();
-  const location = useLocation(); // Initialized useLocation
-  
+  const location = useLocation(); 
+
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
@@ -14,12 +15,11 @@ export default function Search() {
     sort: "createdAt",
     order: "desc",
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
 
   useEffect(() => {
-    // Safely use location.search instead of window.location
     const urlParams = new URLSearchParams(location.search);
     const searchTerm = urlParams.get("searchTerm") || "";
     const typeFromUrl = urlParams.get("type") || "all";
@@ -52,18 +52,29 @@ export default function Search() {
     const fetchListings = async () => {
       setLoading(true);
       const searchQuery = urlParams.toString();
-      const res = await fetch(`/api/listing/get?${searchQuery}`); // Ensure this matches your backend route
+      const res = await fetch(`/api/listing/get?${searchQuery}`); 
       const data = await res.json();
+      
+      // 👇 Added safety check so the app doesn't crash on API errors
+      if (data.success === false) {
+        setListings([]);
+        setLoading(false);
+        return;
+      }
+
       setListings(data);
       setLoading(false);
     };
 
-    fetchListings(); // <-- Called the function here!
-
+    fetchListings(); 
   }, [location.search]);
 
   const handleChange = (e) => {
-    if (e.target.id === "all" || e.target.id === "rent" || e.target.id === "sale") {
+    if (
+      e.target.id === "all" ||
+      e.target.id === "rent" ||
+      e.target.id === "sale"
+    ) {
       setSidebardata({ ...sidebardata, type: e.target.id });
     }
 
@@ -71,10 +82,15 @@ export default function Search() {
       setSidebardata({ ...sidebardata, searchTerm: e.target.value });
     }
 
-    if (e.target.id === "parking" || e.target.id === "furnished" || e.target.id === "offer") {
+    if (
+      e.target.id === "parking" ||
+      e.target.id === "furnished" ||
+      e.target.id === "offer"
+    ) {
       setSidebardata({
         ...sidebardata,
-        [e.target.id]: e.target.checked || e.target.value === "true" ? true : false,
+        [e.target.id]:
+          e.target.checked || e.target.value === "true" ? true : false,
       });
     }
 
@@ -101,10 +117,8 @@ export default function Search() {
 
   return (
     <div className="flex flex-col md:flex-row">
-      {/* Left Sidebar */}
       <div className="p-7 border-b-2 md:border-r-2 md:min-h-screen">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-          
           <div className="flex items-center gap-2">
             <label className="whitespace-nowrap font-semibold">
               Search Term:
@@ -191,7 +205,7 @@ export default function Search() {
             <label className="font-semibold">Sort:</label>
             <select
               onChange={handleChange}
-              value={`${sidebardata.sort}_${sidebardata.order}`} // Synced value
+              value={`${sidebardata.sort}_${sidebardata.order}`}
               id="sort_order"
               className="border rounded-lg p-3"
             >
@@ -208,12 +222,26 @@ export default function Search() {
         </form>
       </div>
 
-      {/* Right Side: Listing Results */}
       <div className="flex-1">
         <h1 className="text-3xl font-semibold border-b p-3 text-slate-700 mt-5 md:mt-0">
           Listing results:
         </h1>
-        {/* Placeholder for listings rendering */}
+        <div className="p-7 flex flex-wrap gap-5">
+          {!loading && listings.length === 0 && (
+            <p className="p-3 text-slate-500 text-xl text-center">
+              No listings found.
+            </p>
+          )}
+          {loading && (
+            <p className="p-3 text-slate-500 text-xl text-center w-full">Loading...</p>
+          )}
+
+          {!loading &&
+            listings.length > 0 &&
+            listings.map((listing) => (
+              <ListingItem key={listing._id} listing={listing} />
+            ))}
+        </div>
       </div>
     </div>
   );
